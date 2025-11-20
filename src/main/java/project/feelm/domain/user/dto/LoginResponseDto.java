@@ -1,0 +1,24 @@
+package project.feelm.domain.user.dto;
+
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class LoginResponseDto {
+    private Long id;
+    private String accountId;
+    private String name;
+    private String email;
+    private String accessToken;
+    private String refreshToken;
+
+    public LoginResponseDto(Long id, String accountId, String name, String email, String accessToken, String refreshToken) {
+        this.id = id;
+        this.accessToken = accessToken;
+        this.email = email;
+        this.name = name;
+        this.accountId = accountId;
+        this.refreshToken = refreshToken;
+    }
+}

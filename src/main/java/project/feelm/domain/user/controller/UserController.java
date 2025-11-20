@@ -41,6 +41,28 @@ public class UserController {
         return ResponseEntity.ok(loginResponseDto);
     }
 
+    @PostMapping("/findId")
+    public ResponseEntity<String> findId(@RequestParam String email) {
+        String accountId = userService.findId(email);
 
+        return ResponseEntity.ok(accountId);
+    }
+
+    @PostMapping("/recover-password")
+    public ResponseEntity<String> recoverPwd(@RequestParam String accountId,
+                                             @RequestParam String email) {
+        String tempPwd = userService.recoverPassword(accountId, email);
+
+        return ResponseEntity.ok(tempPwd);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPwd(@RequestParam String accountId,
+                                      @RequestParam String tempPwd,
+                                      @RequestParam String changePwd) {
+        userService.resetPassword(accountId, tempPwd, changePwd);
+
+        return ResponseEntity.ok().build();
+    }
 
 }

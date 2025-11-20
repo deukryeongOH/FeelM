@@ -17,7 +17,6 @@ import project.feelm.domain.user.service.UserService;
 import project.feelm.global.security.jwt.TokenProvider;
 import project.feelm.global.security.spring.CustomUserDetails;
 
-import java.security.SecureRandom;
 import java.util.Random;
 
 @Service
@@ -88,7 +87,6 @@ public class UserServiceImpl implements UserService {
     }
 
 
-
     @Override
     public String findId(String email) {
         User user = findUserByEmail(email);
@@ -120,7 +118,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(IllegalAccessError::new);
 
         if (!passwordEncoder.matches(nowPwd, findUser.getPassword())) {
-            throw new IllegalArgumentException("입력하신 비밀번호가 일치하지 않습니다.");
+            throw new IllegalArgumentException("입력하신 현재 비밀번호가 일치하지 않습니다.");
         }
 
         findUser.setPassword(passwordEncoder.encode(newPwd));

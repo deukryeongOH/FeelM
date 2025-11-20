@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TokenProvider {
 
-    @Value("${jwt.secret")
+    @Value("${jwt.secret-key}")
     private String secret;
 
     @Value("${jwt.access-expiration}")

@@ -9,7 +9,6 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -25,52 +24,75 @@ public class BatchConfig {
     @Value("${batch.python.command}")
     private String pythonCommand;
 
-    @Value("${batch.python.script-path}")
-    private String scriptPath;
+    @Value("${batch.python.fetch-script}")
+    private String fetchScript;
 
-    /**
-     * Python 스크립트를 실행하는 Step
-     */
+    @Value("${batch.python.analyze-script}")
+    private String analyzeScript;
+
+
     @Bean
     public Step fetchMovieStep(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
         return new StepBuilder("fetchMovieStep", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
-                    log.info("Python 스크립트 실행 시작: {} {}", pythonCommand, scriptPath);
-
-                    ProcessBuilder pb = new ProcessBuilder(pythonCommand, scriptPath);
-                    pb.redirectErrorStream(true); // 에러 출력을 표준 출력으로 병합
-
-                    Process process = pb.start();
-
-                    // 파이썬 스크립트의 출력(print)을 자바 로그로 읽어오기 (디버깅용 필수!)
-                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                        String line;
-                        while ((line = reader.readLine()) != null) {
-                            log.info("[Python Log] : " + line);
-                        }
-                    }
-
-                    int exitCode = process.waitFor();
-
-                    if (exitCode != 0) {
-                        log.error("Python 스크립트 비정상 종료. Exit Code: {}", exitCode);
-                        throw new RuntimeException("Python script failed");
-                    }
-
-                    log.info("Python 스크립트 실행 완료");
+                    log.info("1. 영화 데이터 수집 시작");
+                    runPythonScript(fetchScript);
                     return RepeatStatus.FINISHED;
-
                 }, transactionManager)
                 .build();
     }
+
+    @Bean
+    public Step analyzeMovieStep(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
+        return new StepBuilder("analyzeMovieStep", jobRepository)
+                .tasklet((contribution, chunkContext) -> {
+                    log.info("2. 영화 감정 분석 시작");
+                    runPythonScript(analyzeScript);
+                    return RepeatStatus.FINISHED;
+                }, transactionManager)
+                .build();
+    }
+
+    @Bean
+    public Job moviePipelineJob(JobRepository jobRepository, Step fetchMovieStep, Step analyzeMovieStep) {
+        return new JobBuilder("moviePipelineJob", jobRepository)
+                .start(fetchMovieStep)
+                .next(analyzeMovieStep)
+                .build();
+    }
+
+    private void runPythonScript(String scriptPath) {
+        try {
+            ProcessBuilder pb = new ProcessBuilder(pythonCommand, scriptPath);
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
+
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    log.info("Python: " + line);
+                }
+            }
+
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                throw new RuntimeException("스크립트 실행 실패 : " + exitCode);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("파이썬 실행 중 에러 발생: " + scriptPath, e);
+        }
+    }
+
 
     /**
      * Step을 실행하는 Job
      */
     @Bean
-    public Job fetchMovieJob(JobRepository jobRepository, Step fetchMovieStep) {
+    public Job fetchMovieJob(JobRepository jobRepository, Step fetchMovieStep, Step analyzeMovieStep) {
         return new JobBuilder("fetchMovieJob", jobRepository)
                 .start(fetchMovieStep)
+                .next(analyzeMovieStep)
                 .build();
     }
+
 }

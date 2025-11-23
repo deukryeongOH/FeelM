@@ -1,23 +1,12 @@
 package project.feelm.domain.user.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import project.feelm.domain.user.dto.JoinRequestDto;
-import project.feelm.domain.user.dto.LoginRequestDto;
-import project.feelm.domain.user.dto.LoginResponseDto;
-import project.feelm.domain.user.entity.User;
+import project.feelm.domain.user.dto.*;
 import project.feelm.domain.user.service.UserService;
-import project.feelm.global.security.jwt.TokenProvider;
-import project.feelm.global.security.spring.CustomUserDetails;
 
-import java.util.Optional;
+import java.util.Map;
 
 
 @RequiredArgsConstructor
@@ -42,27 +31,24 @@ public class UserController {
     }
 
     @PostMapping("/findId")
-    public ResponseEntity<String> findId(@RequestParam String email) {
-        String accountId = userService.findId(email);
+    public ResponseEntity<String> findId(@RequestBody EmailDto emailDto) {
+        String accountId = userService.findAccountId(emailDto.getEmail());
 
         return ResponseEntity.ok(accountId);
     }
 
     @PostMapping("/recover-password")
-    public ResponseEntity<String> recoverPwd(@RequestParam String accountId,
-                                             @RequestParam String email) {
-        String tempPwd = userService.recoverPassword(accountId, email);
+    public ResponseEntity<String> recoverPwd(@RequestBody RecoverDto recoverDto) {
+        String tempPwd = userService.recoverPassword(recoverDto.getAccountId(), recoverDto.getEmail());
 
         return ResponseEntity.ok(tempPwd);
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPwd(@RequestParam String accountId,
-                                      @RequestParam String tempPwd,
-                                      @RequestParam String changePwd) {
-        userService.resetPassword(accountId, tempPwd, changePwd);
+    public ResponseEntity<?> resetPwd(@RequestBody ResetDto resetDto) {
+        userService.resetPassword(resetDto.getAccountId(), resetDto.getTempPwd(), resetDto.getChangePwd());
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("암호 변경 성공");
     }
 
 }

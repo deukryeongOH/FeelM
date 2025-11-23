@@ -13,6 +13,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import project.feelm.global.security.spring.CustomUserDetails;
 import project.feelm.global.security.spring.CustomUserDetailsService;
 
 import javax.crypto.SecretKey;
@@ -29,10 +30,10 @@ public class TokenProvider {
     private String secret;
 
     @Value("${jwt.access-expiration}")
-    private String accessToken;
+    private long accessToken;
 
     @Value("${jwt.refresh-expiration}")
-    private String refreshToken;
+    private long refreshToken;
 
     private SecretKey key;
     private final CustomUserDetailsService customUserDetailsService;
@@ -45,7 +46,9 @@ public class TokenProvider {
 
     public String createAccessToken(Authentication authentication){
         Date now = new Date();
-        String accountId = authentication.getName();
+
+        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long id = customUserDetails.getUser().getId();
 
         List<String> roles = authentication.getAuthorities()
                 .stream()
@@ -53,7 +56,7 @@ public class TokenProvider {
                 .collect(Collectors.toList());
 
         return Jwts.builder()
-                .subject(accountId)
+                .subject(String.valueOf(id))
                 .claim("roles", roles)
                 .issuedAt(now)
                 .expiration(new Date(now.getTime()+accessToken))
@@ -63,7 +66,9 @@ public class TokenProvider {
 
     public String createRefreshToken(Authentication authentication){
         Date now = new Date();
-        String accountId = authentication.getName();
+
+        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long id = customUserDetails.getUser().getId();
 
         List<String> roles = authentication.getAuthorities()
                 .stream()
@@ -71,7 +76,7 @@ public class TokenProvider {
                 .collect(Collectors.toList());
 
         return Jwts.builder()
-                .subject(accountId)
+                .subject(String.valueOf(id))
                 .claim("roles", roles)
                 .issuedAt(now)
                 .expiration(new Date(now.getTime()+refreshToken))
@@ -99,7 +104,9 @@ public class TokenProvider {
 
     public Authentication getAuthentication(String token) {
         Claims claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
-        UserDetails userDetails = customUserDetailsService.loadUserByUsername(claims.getSubject());
+
+        Long userId = Long.parseLong(claims.getSubject());
+        UserDetails userDetails = customUserDetailsService.loadUserById(userId);
 
         List<?> roles = (List<?>)claims.get("roles");
         List<SimpleGrantedAuthority> auths = roles.stream().map(Object::toString)

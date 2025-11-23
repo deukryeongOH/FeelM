@@ -60,7 +60,7 @@ class UserServiceImplTest {
         User findUser = userRepository.findByEmail(email)
                 .orElseThrow(IllegalArgumentException::new);
 
-        String accountId = userService.findId(findUser.getEmail());
+        String accountId = userService.findAccountId(findUser.getEmail());
 
         assertThat(accountId).isEqualTo(findUser.getAccountId());
     }
@@ -80,7 +80,6 @@ class UserServiceImplTest {
         userService.resetPassword(findUser.getAccountId(), tempPwd, changePwd);
 
         assertTrue(passwordEncoder.matches(changePwd, findUser.getPassword()));
-
 
     }
 

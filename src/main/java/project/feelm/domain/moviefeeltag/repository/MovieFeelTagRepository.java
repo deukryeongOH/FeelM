@@ -15,10 +15,12 @@ import java.util.Optional;
 public interface MovieFeelTagRepository extends JpaRepository<MovieFeelTag, Long> {
 
     // 특정 Feel 객체에 연결된 모든 태그를 찾는 메서드
-    List<Movie> findMoviesByFeelId(Long feelId);
+    @Query("SELECT mft.movie FROM MovieFeelTag mft WHERE mft.feel.id = :feelId")
+    List<Movie> findMoviesByFeelId(@Param("feelId") Long feelId);
 
     // 특정 Movie 객체에 연결된 모든 태그를 찾는 메서드
-    List<Feel> findFeelByMovieId(Long movieId);
+    @Query("SELECT mft.feel FROM MovieFeelTag mft WHERE mft.movie.id = :movieId")
+    List<Feel> findFeelByMovieId(@Param("movieId") Long movieId);
 
     // 특정 Movie와 Feel이 이미 매핑되어 있는지 확인할 때 사용
     Optional<MovieFeelTag> findByMovieAndFeel(Movie movie, Feel feel);

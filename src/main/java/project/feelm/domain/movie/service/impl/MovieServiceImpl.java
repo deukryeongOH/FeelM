@@ -27,20 +27,28 @@ public class MovieServiceImpl implements MovieService {
 
     @Override
     public List<MovieDto> recommend(FeelDto feelDto, User user) {
-        // feelType에 맞는 영화를 찾아
         Feel feel = feelRepository.findById(feelDto.getFeelId())
                 .orElseThrow(IllegalArgumentException::new);
 
         List<MovieDto> movies = new ArrayList<>();
+        List<MovieDto> result = new ArrayList<>();
         addMovies(movies, feel, user.getAge());
 
+        for (int i = 0; i < 5; i++) {
+            randomAddMovies(movies, result);
+        }
         // 고도화 평점 순으로 추천(추후)
+        return result;
+    }
 
-        return movies;
+    private void randomAddMovies(List<MovieDto> movies, List<MovieDto> result) {
+        int random = (int)(Math.random() * movies.size());
+        if (!result.contains(movies.get(random))) {
+            result.add(movies.get(random));
+        }
     }
 
     private void addMovies(List<MovieDto> movies, Feel feel, int age) {
-        int cnt = 0;
         for (Movie movie : movieFeelTagRepository.findMoviesByFeelId(feel.getId())) {
             MovieDto movieDto = new MovieDto(
                     movie.getTitle(),
@@ -50,10 +58,6 @@ public class MovieServiceImpl implements MovieService {
                     movie.getCertification()
             );
             checkCertification(movies, movieDto, age);
-            cnt++;
-            if (cnt == 5) {
-                break;
-            }
         }
     }
 

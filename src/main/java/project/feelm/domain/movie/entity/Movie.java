@@ -20,6 +20,8 @@ public class Movie {
     private Long id;
 
     private String title;
+
+    @Column(columnDefinition = "TEXT")
     private String plot; // 줄거리
     private String poster_url; // 포스터 url
     private double rate; // 평점

@@ -88,10 +88,8 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public String findId(String email) {
-        User user = findUserByEmail(email);
-
-        return user.getAccountId();
+    public String findAccountId(String email) {
+        return findUserByEmail(email).getAccountId();
     }
 
     @Override

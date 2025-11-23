@@ -13,7 +13,7 @@ public interface UserService {
     String join(JoinRequestDto joinRequestDto);
     LoginResponseDto login(LoginRequestDto loginRequestDto);
     User findUser(Long id);
-    String findId(String email);
+    String findAccountId(String email);
     String recoverPassword(String accountId, String email);
     void resetPassword(String accountId, String tempPwd, String changePwd);
 }

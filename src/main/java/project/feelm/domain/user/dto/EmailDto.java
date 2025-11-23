@@ -7,10 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class JoinRequestDto {
-    private String name;
-    private int age;
+public class EmailDto {
     private String email;
-    private String accountId;
-    private String password;
+
 }

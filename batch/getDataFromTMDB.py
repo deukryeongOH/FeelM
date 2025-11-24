@@ -1,5 +1,6 @@
 import requests
 import pymysql
+import random
 
 API_KEY = "21a66a7a9477c7c42b6fbefe99eda6f3"
 
@@ -90,11 +91,11 @@ def save_movie(movie_details):
         movie_details.get('title'),
         movie_details.get('overview'),
         movie_details.get('poster_path'),
-        movie_details.get('vote_average'),
+        rate,
         certification
     ))
 
-for page in range(1, 11):
+for page in range(1, 3):
     movies = fetch_movies(page, 'popular')
 
     for m in movies:
@@ -109,7 +110,7 @@ for page in range(1, 11):
                 print(f"Error saving {movie_id}: {e}")
                 conn.rollback()
 
-for page in range(1, 6):
+for page in range(1, 3):
     movies = fetch_movies(page, 'top_rated')
 
     for m in movies:
@@ -124,7 +125,7 @@ for page in range(1, 6):
                 print(f"Error saving {movie_id}: {e}")
                 conn.rollback()
 
-random_pages = random.sample(range(10, 30), 5) # 10~100페이지 중 랜덤 5개 선택
+random_pages = random.sample(range(10, 30), 2) # 10~30페이지 중 랜덤 2개 선택
 for page in random_pages:
     movies = fetch_movies(page, 'popular')
     for m in movies:

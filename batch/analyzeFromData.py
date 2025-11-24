@@ -24,7 +24,7 @@ def insert_initial_feels():
 
 def get_movies():
     # 이미 태그 작업이 완료된 영화는 제외하고 가져오는 로직이 있으면 더 좋습니다.
-    # 일단은 전체 조회
+    # 일단 전체 조회
     cursor.execute("SELECT id, plot FROM Movie")
     return cursor.fetchall()
 

@@ -30,6 +30,12 @@ const ProfilePage = ({ user, onNavigate }) => {
         </div>
 
         <div className="flex flex-col md:flex-row md:items-center border-b border-gray-700 pb-4">
+          <span className="text-gray-400 w-32 text-sm md:text-base mb-1 md:mb-0">나이</span>
+          <span className="text-lg font-medium">{user.age}</span>세
+        </div>
+
+
+        <div className="flex flex-col md:flex-row md:items-center border-b border-gray-700 pb-4">
           <span className="text-gray-400 w-32 text-sm md:text-base mb-1 md:mb-0">이메일</span>
           <span className="text-lg font-medium">{user.email}</span>
         </div>

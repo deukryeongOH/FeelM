@@ -1,0 +1,8 @@
+# IntelliJ 설정 파일 무시
+.idea/workspace.xml
+.idea/usage.statistics.xml
+.idea/shelf/
+
+# 운영체제 생성 파일 무시 (선택사항)
+.DS_Store
+Thumbs.db

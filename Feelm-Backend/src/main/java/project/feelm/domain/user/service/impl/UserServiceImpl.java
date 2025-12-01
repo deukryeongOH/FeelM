@@ -72,6 +72,7 @@ public class UserServiceImpl implements UserService {
         return new LoginResponseDto(
                 user.getId(),
                 user.getAccountId(),
+                user.getAge(),
                 user.getName(),
                 user.getEmail(),
                 accessToken,

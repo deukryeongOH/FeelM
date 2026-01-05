@@ -25,7 +25,7 @@ public class MovieController {
     public ResponseEntity<List<MovieDto>> recommendMovie(@RequestBody FeelDto feelDto,
                                                          @AuthenticationPrincipal CustomUserDetails customUserDetails){
         User user = customUserDetails.getUser();
-        // 추천 영화 리스트를 넘김 (5개)
+        // 추천 영화 리스트를 넘김 (20개)
         List<MovieDto> moviesDto = movieService.recommend(feelDto, user);
 
         return ResponseEntity.ok(moviesDto);

@@ -34,7 +34,7 @@ public class MovieServiceImpl implements MovieService {
         List<MovieDto> result = new ArrayList<>();
         addMovies(movies, feel, user.getAge());
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 20; i++) {
             randomAddMovies(movies, result);
         }
         // 고도화 평점 순으로 추천(추후)

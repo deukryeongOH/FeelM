@@ -53,14 +53,6 @@ public class BatchConfig {
                 .build();
     }
 
-    @Bean
-    public Job moviePipelineJob(JobRepository jobRepository, Step fetchMovieStep, Step analyzeMovieStep) {
-        return new JobBuilder("moviePipelineJob", jobRepository)
-                .start(fetchMovieStep)
-                .next(analyzeMovieStep)
-                .build();
-    }
-
     private void runPythonScript(String scriptPath) {
         try {
             ProcessBuilder pb = new ProcessBuilder(pythonCommand, scriptPath);

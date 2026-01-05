@@ -24,6 +24,8 @@ public class Movie {
     @Column(columnDefinition = "TEXT")
     private String plot; // 줄거리
     private String poster_url; // 포스터 url
+    private String genres; // 장르
+    private String keywords; // 키워드
     private double rate; // 평점
     private int certification; // 시청 등급
 

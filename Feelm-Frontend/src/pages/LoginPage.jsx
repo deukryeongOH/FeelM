@@ -29,7 +29,21 @@ const LoginPage = ({ onNavigate, onLogin }) => {
 
       if (response.ok) {
         const data = await response.json();
-        onLogin(data);
+
+        const tokens = {
+            accessToken: data.accessToken,
+            refreshToken: data.refreshToken
+        };
+
+        const userData = {
+            id: data.id,
+            accountId: data.accountId,
+            name: data.name,
+            email: data.email,
+            age: data.age
+        };
+
+        onLogin(userData, tokens);
         alert(`${data.name}님 환영합니다!`);
         onNavigate('home');
       } else {

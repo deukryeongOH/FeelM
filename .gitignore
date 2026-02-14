@@ -6,3 +6,12 @@
 # 운영체제 생성 파일 무시 (선택사항)
 .DS_Store
 Thumbs.db
+
+# 설정 파일 무시
+.env
+
+# IntelliJ 설정 무시
+.idea/
+*.iws
+*.iml
+*.ipr

@@ -1,9 +1,11 @@
 package project.feelm;
 
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+@EnableBatchProcessing // batch 기능 활성화
 @EnableScheduling // 스케줄링 기능 활성화 (배포 후 운영 시)
 @SpringBootApplication
 public class FeelmApplication {

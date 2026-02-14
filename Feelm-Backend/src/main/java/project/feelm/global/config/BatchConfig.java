@@ -11,7 +11,9 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -20,6 +22,9 @@ import java.io.InputStreamReader;
 @Configuration
 @RequiredArgsConstructor
 public class BatchConfig {
+
+    @Value("${batch.python.url")
+    private String batchServiceUrl;
 
     @Value("${batch.python.command}")
     private String pythonCommand;
@@ -30,13 +35,32 @@ public class BatchConfig {
     @Value("${batch.python.analyze-script}")
     private String analyzeScript;
 
+    private void callPythonApi(String endPoint) {
+        String batchUrl = "http://batch-service:5000" + endPoint; // docker-compose 서비스 이름 사용
+        RestTemplate restTemplate = new RestTemplate();
+
+        try {
+            log.info("Python API 호출: " + batchUrl);
+            // Post 요청 전송
+            ResponseEntity<String> response = restTemplate.postForEntity(batchUrl, null, String.class);
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                log.info("Python Job 성공: " + response.getBody());
+            } else {
+                throw new RuntimeException("Python Job 실패: " + response.getStatusCode());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("API 호출 에러:" + e.getMessage());
+        }
+    }
 
     @Bean
     public Step fetchMovieStep(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
         return new StepBuilder("fetchMovieStep", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
                     log.info("1. 영화 데이터 수집 시작");
-                    runPythonScript(fetchScript);
+//                    runPythonScript(fetchScript);
+                    callPythonApi("/run-fetch");
                     return RepeatStatus.FINISHED;
                 }, transactionManager)
                 .build();
@@ -47,7 +71,8 @@ public class BatchConfig {
         return new StepBuilder("analyzeMovieStep", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
                     log.info("2. 영화 감정 분석 시작");
-                    runPythonScript(analyzeScript);
+//                    runPythonScript(analyzeScript);
+                    callPythonApi("/run-analyze");
                     return RepeatStatus.FINISHED;
                 }, transactionManager)
                 .build();

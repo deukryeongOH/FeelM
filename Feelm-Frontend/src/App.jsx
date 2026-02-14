@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Film, User, LogIn, UserPlus, LogOut } from 'lucide-react';
 
 // 페이지 컴포넌트 임포트
@@ -11,8 +11,30 @@ import RecommendPage from './pages/RecommendPage';
 export default function App() {
   const [currentView, setCurrentView] = useState('home');
   const [user, setUser] = useState(null);
+  useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken');
+    const storedUser = localStorage.getItem('user'); // 사용자 이름도 저장했다고 가정
 
+    if (accessToken && storedUser) {
+      // 토큰과 이름이 있으면 로그인 상태로 설정
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+  
+  const handleLoginSuccess = (userData, tokens) => {
+    // 1. 상태 업데이트
+    setUser(userData); 
+    // 2. 로컬 스토리지에 저장 (새로고침 대비)
+    localStorage.setItem('accessToken', tokens.accessToken);
+    localStorage.setItem('refreshToken', tokens.refreshToken);
+    localStorage.setItem('user', JSON.stringify(userData));
+  };
+  
   const handleLogout = () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
+    
     setUser(null);
     setCurrentView('home');
     alert('로그아웃 되었습니다.');
@@ -21,7 +43,7 @@ export default function App() {
   const renderContent = () => {
     switch (currentView) {
       case 'home': return <MainPage onNavigate={setCurrentView} user={user} />;
-      case 'login': return <LoginPage onNavigate={setCurrentView} onLogin={setUser} />;
+      case 'login': return <LoginPage onNavigate={setCurrentView} onLogin={handleLoginSuccess} />;
       case 'signup': return <SignupPage onNavigate={setCurrentView} />;
       case 'profile': return <ProfilePage user={user} onNavigate={setCurrentView} />;
       case 'recommend': return <RecommendPage user={user} onNavigate={setCurrentView} />;

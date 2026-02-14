@@ -1,8 +1,9 @@
 from openai import OpenAI
 import pymysql
-import torch
-import torch.nn.functional as F
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+# BERT 사용 x
+# import torch
+# import torch.nn.functional as F
+# from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import re
 import os
 
@@ -28,8 +29,15 @@ client = OpenAI(api_key=API_KEY)
 #     print("LearningModel.py를 먼저 실행하여 모델을 학습시켜주세요.")
 #     exit()
 
-conn = pymysql.connect(host='localhost', port=3306, user='root', password='0630', database='feelm', charset='utf8')
+# local 일때
+# conn = pymysql.connect(host='localhost', port=3306, user='root', password='0630', database='feelm', charset='utf8')
+
+# Docker docker-compose에서 설정한 DB 이름, 호스트 가져옴
+db_host = os.getenv("DB_HOST", "localhost")
+db_password = os.getenv("DB_PASSWORD", "0630")
+conn = pymysql.connect(host = db_host, port = 3306, user = 'root', password = db_password, database = 'feelm', charset = 'utf8')
 cursor = conn.cursor()
+
 
 def insert_initial_feels():
     initial_feels = ['기쁨', '슬픔', '설렘', '공포', '외로움']

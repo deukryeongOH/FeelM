@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # spring boot
   backend:
-    build: ./Feelm-Backend
+    image: deukr/feelm-backend:latest
     ports:
       - "8080:8080"
     depends_on:
@@ -22,7 +22,7 @@ services:
 
   # python
   batch-service:
-    build: ./Feelm-BatchScript
+    image: deukr/feelm-batch-service:latest
     ports:
       - "5000:5000"
     depends_on:

@@ -1,0 +1,101 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [ "master" ]
+    # 개발자가 master 브랜치에 코드를 업로드(Push) 하는 순간
+    # 깃허브가 이를 감지하고 이 배포 작업을 자동으로 시작한다.
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    # 배포 작업을 수행할 컴퓨터(Runner)를 지정한다.
+    # 깃허브가 제공하는 최신 우분투 가상머신을 잠시 빌려 쓴다.
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+        #깃허브 저장소에 있는 내 코드를 방금 빌린 우분투 컴퓨터로 내려받는다.
+        # 이게 없으면 빈 컴퓨터에서 작업하는 꼴이 된다.
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD_ACCESS_TOKEN }}
+          # docker hub에 로그인 한다.
+          # 로그인을 해야 내가 만든 이미지를 업로드할 수 있다.
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        # 도커 이미지를 효율적으로 만들기 위한 최신 빌드 도구 설치
+
+      # springboot 이미지 빌드 및 푸시 (백엔드 이미지 포장)
+      - name: Build and Push Backend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./Feelm-Backend  # Dockerfile이 있는 폴더 위치
+          file: ./Feelm-Backend/Dockerfile   # Dockerfile 파일 경로
+          push: true                # 빌드 끝나면 바로 Docker Hub로 전송
+          tags: ${{ secrets.DOCKER_USERNAME }}/feelm-backend:latest
+          #  백엔드 코드를 실행 가능한 이미지로 만들어 docker hub으로 보낸다.
+          # 코드는 feelm-backend:latest라는 이름의 상품이 되어 창고에 저장된다.
+
+      # python ai 이미지 빌드 및 푸시
+      - name: BUild and Push Batch Service
+        uses: docker/build-push-action@v6
+        with:
+          context: ./Feelm-BatchScript
+          file: ./Feelm-BatchScript/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/feelm-batch-service:latest
+          # 파이썬 코드도 마찬가지로 이미지로 만들어 Docker Hub로 보낸다.
+
+      # SCP = 배달
+      # docker-compose.yml 파일 서버로 전송
+      - name: Copy docker-compose to EC2
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST_EC2_IP }}
+          username: ubuntu
+          key: ${{ secrets.AWS_KEY }}
+          source: "docker-compose.yml"
+          target: "/home/ubuntu/app"
+          # 서버(EC2)가 이미지를 실행하려면 어떻게 실행할지 적힌 설명서가 필요하다.
+          # 그 설명서인 docker-compose.yml을 내 github에서 ec2로 복사한다.
+          # scp는 파일을 안전하게 전송하는 기술이다.
+
+      # 원격 조종 (SSH)
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST_EC2_IP }}
+          username: ubuntu
+          key: ${{ secrets.AWS_KEY }}
+          script: |
+            # 작업 폴더로 이동 (없으면 생성)
+            mkdir -p /home/ubuntu/app
+            cd /home/ubuntu/app
+            
+            # .env 파일 생성
+            # 보안상 깃허브에 올리지 않았던 비밀 정보들을
+            # GitHub Secrets(금고)에서 꺼내와서, 서버 현장에서 .env 파일로 만든다.
+            # 이렇게 하면 해커가 코드를 훔쳐봐도 비밀번호는 알 수 없다.
+            echo "TMDB_API_KEY=${{ secrets.TMDB_API_KEY }}" > .env
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+            echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
+            echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
+            
+            # Docker Hub 로그인
+            # 서버가 Docker Hub에서 비공개 이미지를 가져오려면 로그인이 필요하다.
+            echo ${{ secrets.DOCKER_PASSWORD_ACCESS_TOKEN }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+            
+            # 최신 이미지 받기 및 실행 (Pull)
+            # 3번 단계에 DOcker Hub에 올린 최신 버전 이미지를 다운로드한다.
+            docker-compose pull
+            
+            # 갈아끼우기 (Up)
+            # docker-compose가 새 이미지를 감지하면
+            # 예전 컨테이너를 끄고 새 컨테이너를 실행한다.
+            docker-compose up -d
+            
+            # 불필요한 이미지 삭제 (Prune)
+            # 배포를 계속하다 보면 안 쓰는 옛날 이미지가 쌓여 용량을 차지한다.
+            # 쓰레기통을 비워서 서버를 꺠끗하게 유지한다.
+            docker image prune -f

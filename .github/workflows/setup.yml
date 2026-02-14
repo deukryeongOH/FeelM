@@ -1,0 +1,39 @@
+name: Setup EC2 Server
+
+on:
+  push:
+    branches: [ "master" ]
+    paths:
+      - '.github/workflows/setup.yml' # 이 파일이 만들어질 때만 실행됨
+
+jobs:
+  setup-docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install Docker & Compose on EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST_EC2_IP }}
+          username: ubuntu
+          key: ${{ secrets.AWS_KEY }}
+          script: |
+            # 1. 시스템 업데이트
+            sudo apt-get update -y
+            
+            # 2. Docker 설치
+            sudo apt-get install -y docker.io
+            
+            # 3. Docker 실행 권한 부여 (sudo 없이 사용위해)
+            sudo usermod -aG docker $USER
+            sudo chmod 666 /var/run/docker.sock
+            
+            # 4. Docker Compose 설치 (최신 버전 다운로드)
+            sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            
+            # 5. 실행 권한 부여
+            sudo chmod +x /usr/local/bin/docker-compose
+            
+            # 6. 설치 확인
+            docker --version
+            docker-compose --version

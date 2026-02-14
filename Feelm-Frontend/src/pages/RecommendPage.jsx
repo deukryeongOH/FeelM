@@ -1,23 +1,38 @@
 import React, { useState } from 'react';
-import { Smile, Frown, Heart, ArrowLeft } from 'lucide-react';
+import { Smile, Frown, Heart, ArrowLeft, Ghost, User } from 'lucide-react';
 import MovieCard from '../components/MovieCard';
+import MovieDetailModal from '../components/MovieDetailModal';
 
 const RecommendPage = ({ user, onNavigate }) => {
   const [recommendedMovies, setRecommendedMovies] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedMood, setSelectedMood] = useState(null);
+  const [selectedMovie, setSelectedMovie] = useState(null);
 
   const moods = [
     { label: '행복함', feelId: 1, feelType: 'Happy', icon: <Smile className="text-yellow-400" /> },
     { label: '우울함', feelId: 2, feelType: 'Sad', icon: <Frown className="text-blue-400" /> },
-    { label: '설렘', feelId: 3, feelType: 'Flutter', icon: <Heart className="text-pink-400" /> }
+    { label: '설렘', feelId: 3, feelType: 'Flutter', icon: <Heart className="text-pink-400" /> },
+    { label: '공포', feelId: 4, feelType: 'Fear', icon: <Ghost className="text-purple-500" /> },
+    { label: '외로움', feelId: 5, feelType: 'Lonely', icon: <User className="text-gray-400" /> }
   ];
 
   const handleMoodSelect = async (mood) => {
+    // 1. 로그인 여부 1차 확인 (UI 상태 기준)
     if (!user) {
       alert('로그인이 필요한 서비스입니다.');
       onNavigate('login');
       return;
+    }
+
+    // [수정] 토큰은 localStorage에서 직접 가져옵니다.
+    const token = localStorage.getItem('accessToken');
+
+    // 2. 토큰 존재 여부 2차 확인 (보안)
+    if (!token) {
+        alert('로그인 세션이 만료되었습니다. 다시 로그인해주세요.');
+        onNavigate('login');
+        return;
     }
 
     setSelectedMood(mood.label);
@@ -33,7 +48,8 @@ const RecommendPage = ({ user, onNavigate }) => {
       const response = await fetch('http://localhost:8080/api/movie/recommend', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${user.accessToken}`,
+          // [수정] user.accessToken 대신 위에서 가져온 token 변수 사용
+          'Authorization': `Bearer ${token}`, 
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(requestBody)
@@ -42,6 +58,10 @@ const RecommendPage = ({ user, onNavigate }) => {
       if (response.ok) {
         const data = await response.json();
         setRecommendedMovies(data);
+      } else if (response.status === 403 || response.status === 401) {
+        // [수정] 인증 실패(403, 401) 시 처리 추가
+        alert('권한이 없거나 로그인이 만료되었습니다.');
+        onNavigate('login');
       } else {
         alert('영화 추천을 불러오는데 실패했습니다.');
       }
@@ -55,6 +75,13 @@ const RecommendPage = ({ user, onNavigate }) => {
 
   return (
     <div className="flex flex-col items-center min-h-[60vh] text-white w-full">
+      {selectedMovie && (
+        <MovieDetailModal 
+          movie={selectedMovie} 
+          onClose={() => setSelectedMovie(null)} 
+        />
+      )}
+
       {recommendedMovies ? (
         <div className="w-full max-w-6xl animate-fade-in">
           <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
@@ -74,7 +101,7 @@ const RecommendPage = ({ user, onNavigate }) => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
             {recommendedMovies.map((movie, idx) => (
-              <MovieCard key={idx} movie={movie} />
+              <MovieCard key={idx} movie={movie} onClick={() => setSelectedMovie(movie)}/>
             ))}
           </div>
         </div>

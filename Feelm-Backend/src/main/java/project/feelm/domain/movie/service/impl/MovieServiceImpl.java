@@ -8,7 +8,9 @@ import project.feelm.domain.feel.entity.Feel;
 import project.feelm.domain.feel.repository.FeelRepository;
 import project.feelm.domain.movie.dto.FeelDto;
 import project.feelm.domain.movie.dto.MovieDto;
+import project.feelm.domain.movie.dto.SliderDto;
 import project.feelm.domain.movie.entity.Movie;
+import project.feelm.domain.movie.repository.MovieRepository;
 import project.feelm.domain.movie.service.MovieService;
 import project.feelm.domain.moviefeeltag.repository.MovieFeelTagRepository;
 import project.feelm.domain.user.entity.User;
@@ -23,6 +25,7 @@ public class MovieServiceImpl implements MovieService {
 
     private final MovieFeelTagRepository movieFeelTagRepository;
     private final FeelRepository feelRepository;
+    private final MovieRepository movieRepository;
 
 
     @Override
@@ -39,6 +42,16 @@ public class MovieServiceImpl implements MovieService {
         }
         // 고도화 평점 순으로 추천(추후)
         return result;
+    }
+
+    @Override
+    public List<SliderDto> getSlider() {
+        List<SliderDto> dtoList = new ArrayList<>();
+        for(Movie movie : movieRepository.findRandomMovies()){
+            SliderDto dto = new SliderDto(movie.getTitle(), movie.getPoster_url());
+            dtoList.add(dto);
+        }
+        return dtoList;
     }
 
     private void randomAddMovies(List<MovieDto> movies, List<MovieDto> result) {

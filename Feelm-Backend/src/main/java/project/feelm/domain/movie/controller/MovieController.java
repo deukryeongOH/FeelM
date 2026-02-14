@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import project.feelm.domain.movie.dto.FeelDto;
 import project.feelm.domain.movie.dto.MovieDto;
+import project.feelm.domain.movie.dto.SliderDto;
 import project.feelm.domain.movie.service.MovieService;
 import project.feelm.domain.user.entity.User;
 import project.feelm.global.security.spring.CustomUserDetails;
@@ -17,6 +18,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/movie")
+@CrossOrigin(origins = "http://localhost:5173")
 public class MovieController {
 
     private final MovieService movieService;
@@ -29,5 +31,14 @@ public class MovieController {
         List<MovieDto> moviesDto = movieService.recommend(feelDto, user);
 
         return ResponseEntity.ok(moviesDto);
+    }
+
+    // 영화 데이터를 가져와 슬라이드 애니메이션 구현
+    @GetMapping("/slider")
+    public ResponseEntity<List<SliderDto>> getSlider(){
+        // movie의 title, poster_url의 리스트를 반환
+        List<SliderDto> dto = movieService.getSlider();
+
+        return ResponseEntity.ok(dto);
     }
 }

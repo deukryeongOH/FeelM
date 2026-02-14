@@ -48,6 +48,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/user/findId").permitAll()
                         .requestMatchers("/api/user/recover-password").permitAll()
                         .requestMatchers("/api/user/reset-password").permitAll()
+                        .requestMatchers("/api/movie/slider").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

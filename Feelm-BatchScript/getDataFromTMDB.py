@@ -4,9 +4,16 @@ import random
 import time
 from datetime import datetime, timedelta
 
-API_KEY = "21a66a7a9477c7c42b6fbefe99eda6f3"
+API_KEY = os.getenv("TMDB_API_KEY")
 
-conn = pymysql.connect(host='localhost', port=3306, user='root', password='0630', database='feelm', charset='utf8')
+# local 일때
+# conn = pymysql.connect(host='localhost', port=3306, user='root', password='0630', database='feelm', charset='utf8')
+
+# Docker docker-compose에서 설정한 DB 이름, 호스트 가져옴
+db_host = os.getenv("DB_HOST", "localhost")
+db_password = os.getenv("DB_PASSWORD", "0630")
+
+conn = pymysql.connect(host = db_host, port = 3306, user = 'root', password = db_password, database = 'feelm', charset = 'utf8')
 cursor = conn.cursor()
 
 
@@ -189,6 +196,7 @@ def process_movies(page_range, category):
                     print(f"Error saving {movie_id}: {e}")
                     conn.rollback()
 
+        time.sleep(0.5)
 # for page in range(1, 3):
 #     movies = fetch_movies(page, 'popular')
 #
@@ -236,13 +244,13 @@ def process_movies(page_range, category):
 
 # 아래 코드를 압축
 print("Processing Popular Movies...")
-process_movies(range(1, 10), 'popular')
+process_movies(range(1, 51), 'popular')
 
 print("Processing Top Rated Movies...")
-process_movies(range(1, 10), 'top_rated')
+process_movies(range(1, 31), 'top_rated')
 
 print("Processing Random Movies...")
-random_pages = random.sample(range(10, 30), 2)
+random_pages = random.sample(range(51, 100), 10)
 process_movies(random_pages, 'popular')
 
 conn.commit()

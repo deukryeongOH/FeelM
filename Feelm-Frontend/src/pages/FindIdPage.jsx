@@ -13,7 +13,7 @@ const FindIdPage = ({ onNavigate }) => {
     setIsLoading(true);
     try {
       // JSON Body 방식으로 전송하여 EOFException 방지
-      const response = await fetch('http://localhost:8080/api/user/findId', {
+      const response = await fetch('/api/user/findId', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email })

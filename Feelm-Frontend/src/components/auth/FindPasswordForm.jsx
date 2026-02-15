@@ -21,7 +21,7 @@ const FindPasswordForm = ({ onCancel }) => {
     setIsLoading(true);
     try {
       const query = `accountId=${encodeURIComponent(recoverData.accountId)}&email=${encodeURIComponent(recoverData.email)}`;
-      const response = await fetch(`http://localhost:8080/recover-password?${query}`, {
+      const response = await fetch(`/recover-password?${query}`, {
         method: 'POST',
       });
 
@@ -51,7 +51,7 @@ const FindPasswordForm = ({ onCancel }) => {
     setIsLoading(true);
     try {
       const query = `accountId=${encodeURIComponent(recoverData.accountId)}&tempPwd=${encodeURIComponent(resetData.tempPwd)}&changePwd=${encodeURIComponent(resetData.changePwd)}`;
-      const response = await fetch(`http://localhost:8080/reset-password?${query}`, {
+      const response = await fetch(`/reset-password?${query}`, {
         method: 'POST',
       });
 

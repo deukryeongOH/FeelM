@@ -109,6 +109,10 @@ jobs:
             # 보안상 깃허브에 올리지 않았던 비밀 정보들을
             # GitHub Secrets(금고)에서 꺼내와서, 서버 현장에서 .env 파일로 만든다.
             # 이렇게 하면 해커가 코드를 훔쳐봐도 비밀번호는 알 수 없다.
+            echo "FEELM_ENDPOINT=${{ secrets.FEELM_ENDPOINT }}" > .env
+            echo "RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}" >> .env
+            echo "BATCH_SERVICE_URL=${{ secrets.LAMBDA_URL }}" >> .env
+            echo "SPRING_PROFILES_ACTIVE=prod" > .env
             echo "TMDB_API_KEY=${{ secrets.TMDB_API_KEY }}" > .env
             echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
             echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env

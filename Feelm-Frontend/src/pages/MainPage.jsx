@@ -9,7 +9,7 @@ const MainPage = ({ onNavigate, user }) => {
     const fetchMovies = async () => {
       try {
         // 백엔드 API 호출 (랜덤 or 최신 영화 20개)
-        const response = await fetch('http://localhost:8080/api/movie/slider');
+        const response = await fetch('/api/movie/slider');
         
         if (!response.ok) {
           throw new Error('Network response was not ok');

@@ -45,7 +45,7 @@ const RecommendPage = ({ user, onNavigate }) => {
         feelType: mood.feelType
       };
 
-      const response = await fetch('http://localhost:8080/api/movie/recommend', {
+      const response = await fetch('/api/movie/recommend', {
         method: 'POST',
         headers: {
           // [수정] user.accessToken 대신 위에서 가져온 token 변수 사용

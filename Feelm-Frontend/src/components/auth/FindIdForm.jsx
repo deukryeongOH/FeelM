@@ -11,7 +11,7 @@ const FindIdForm = ({ onCancel }) => {
     
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:8080/api/user/findId', {
+      const response = await fetch('/api/user/findId', {
         method: 'POST', 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email })

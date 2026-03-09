@@ -115,7 +115,7 @@ const LoginPage = ({ onNavigate, onLogin }) => {
     if (!resetData.tempPwd || !resetData.changePwd) return alert('모든 정보를 입력해주세요.');
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:8080/api/user/reset-password', {
+      const response = await fetch('/api/user/reset-password', {
         method: 'POST', 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ accountId: recoverData.accountId, tempPwd: resetData.tempPwd, changePwd: resetData.changePwd})

@@ -18,7 +18,7 @@ const ResetPasswordPage = ({ onNavigate, initialData }) => {
     setIsLoading(true);
     try {
       const query = `accountId=${encodeURIComponent(data.accountId)}&tempPwd=${encodeURIComponent(data.tempPwd)}&changePwd=${encodeURIComponent(data.changePwd)}`;
-      const response = await fetch(`http://localhost:8080/api/user/reset-password?${query}`, { method: 'POST' });
+      const response = await fetch(`/api/user/reset-password?${query}`, { method: 'POST' });
 
       if (response.ok) {
         alert('비밀번호가 성공적으로 변경되었습니다.\n새 비밀번호로 로그인해주세요.');

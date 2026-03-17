@@ -64,6 +64,9 @@ public class SecurityConfig {
 
         configuration.setAllowCredentials(true); // 쿠키 허용
         configuration.addAllowedOrigin("http://localhost:5173"); // 프론트 주소
+        configuration.addAllowedOrigin("http://15.164.52.45"); // EC2 IP
+        configuration.addAllowedOrigin("http://15.164.52.45:8080");
+
         configuration.addAllowedHeader("*"); // 모든 header 허용
         configuration.addAllowedMethod("*"); // 모든 method 허용
 

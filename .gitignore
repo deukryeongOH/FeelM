@@ -16,3 +16,10 @@ application.properties
 *.iws
 *.iml
 *.ipr
+
+# batch junkfile
+Feelm-BatchScript/*
+Feelm-BatchScript/*/
+Feelm-BatchScript/*.so
+Feelm-BatchScript/*.zip
+Feelm-BatchScript/__pycache__/

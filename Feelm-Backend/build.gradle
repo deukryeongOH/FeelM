@@ -35,6 +35,17 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-batch'
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
 
+    // AWS SDK 버전 관리를 위한 BOM 설정
+    implementation platform('software.amazon.awssdk:bom:2.20.0')
+
+    // Lambda 호출을 위한 의존성
+    implementation 'software.amazon.awssdk:lambda'
+    // Region 클래스 의존성
+    implementation 'software.amazon.awssdk:regions'
+    // AWS 인증 의존성
+    implementation 'software.amazon.awssdk:auth'
+
+
     compileOnly 'org.projectlombok:lombok'
 
     runtimeOnly 'com.mysql:mysql-connector-j'

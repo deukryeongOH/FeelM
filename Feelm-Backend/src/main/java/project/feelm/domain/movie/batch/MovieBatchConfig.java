@@ -8,6 +8,7 @@ import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,10 +47,12 @@ public class MovieBatchConfig {
      * Step을 실행하는 Job
      */
     @Bean
-    public Job fetchMovieJob(JobRepository jobRepository, Step fetchMovieStep, Step analyzeMovieStep) {
+    public Job fetchMovieJob(JobRepository jobRepository,
+                             @Qualifier("fetchStep") Step fetchStep,
+                             @Qualifier("analyzeStep") Step analyzeStep) {
         return new JobBuilder("fetchMovieJob", jobRepository)
-                .start(fetchMovieStep)
-                .next(analyzeMovieStep)
+                .start(fetchStep)
+                .next(analyzeStep)
                 .build();
     }
 

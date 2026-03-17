@@ -31,7 +31,7 @@ public class LambdaInvokeTasklet implements Tasklet {
     private void invokeLambda(String path) {
         String payload = "{\"rawPath\": \"" + path + "\"}";
         InvokeRequest request = InvokeRequest.builder()
-                .functionName("!!!!!!!!람다함수명!!!!!!!")
+                .functionName(functionName)
                 .payload(SdkBytes.fromUtf8String(payload))
                 .build();
 

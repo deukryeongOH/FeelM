@@ -109,6 +109,8 @@ jobs:
             echo "TMDB_API_KEY=${{ secrets.TMDB_API_KEY }}" >> .env
             echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
             echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
+            echo "JWT_ACCESS_EXPIRATION=${{ secrets.JWT_ACCESS_EXPIRATION }}" >> .env
+            echo "JWT_REFRESH_EXPIRATION=${{ secrets.JWT_REFRESH_EXPIRATION }}" >> .env
             
             # Docker Hub 로그인
             # 서버가 Docker Hub에서 비공개 이미지를 가져오려면 로그인이 필요하다.

@@ -109,6 +109,7 @@ jobs:
             
             echo "BATCH_SERVICE_URL=${{ secrets.LAMBDA_URL }}" >> .env
             
+            echo "AWS_LAMBDA_FUNCTION_NAME=${{ secrets.AWS_LAMBDA_FUNCTION_NAME }}" >> .env
             echo "TMDB_API_KEY=${{ secrets.TMDB_API_KEY }}" >> .env
             echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
             
@@ -117,6 +118,7 @@ jobs:
             echo "JWT_REFRESH_EXPIRATION=${{ secrets.JWT_REFRESH_EXPIRATION }}" >> .env
             
             echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> .env
+            echo "AWS_LAMBDA_FUNCTION_NAME=${{ secrets.AWS_LAMBDA_FUNCTION_NAME }}" >> .env
             echo "AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }}" >> .env
             echo "AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }}" >> .env
             

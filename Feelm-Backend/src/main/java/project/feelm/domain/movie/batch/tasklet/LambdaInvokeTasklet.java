@@ -22,8 +22,7 @@ public class LambdaInvokeTasklet implements Tasklet {
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        invokeLambda("/run-fetch");
-        invokeLambda("/run-analyze");
+        invokeLambda(this.path);
 
         return RepeatStatus.FINISHED;
     }

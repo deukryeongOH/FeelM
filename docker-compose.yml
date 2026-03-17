@@ -36,6 +36,8 @@ services:
       - BATCH_SERVICE_URL=${BATCH_SERVICE_URL}
       # (추가) JWT 비밀키가 있다면 여기에 적기
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_ACCESS_EXPIRATION=${JWT_ACCESS_EXPIRATION}
+      - JWT_REFRESH_EXPIRATION=${JWT_REFRESH_EXPIRATION}
     networks:
       - feelm-network
 networks:

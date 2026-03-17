@@ -2,6 +2,7 @@ import requests
 import pymysql
 import random
 import time
+import os
 from datetime import datetime, timedelta
 
 API_KEY = os.getenv("TMDB_API_KEY")
@@ -10,11 +11,8 @@ API_KEY = os.getenv("TMDB_API_KEY")
 # conn = pymysql.connect(host='localhost', port=3306, user='root', password='0630', database='feelm', charset='utf8')
 
 # Docker docker-compose에서 설정한 DB 이름, 호스트 가져옴
-db_host = os.getenv("DB_HOST", "localhost")
-db_password = os.getenv("DB_PASSWORD", "0630")
-
-conn = pymysql.connect(host = db_host, port = 3306, user = 'root', password = db_password, database = 'feelm', charset = 'utf8')
-cursor = conn.cursor()
+db_host = os.getenv("RDS_ENDPOINT", "localhost")
+db_password = os.getenv("RDS_MASTER_PASSWORD", "0630")
 
 
 # 영화 데이터의 다양성을 높이기 위해 페이지와 카테고리 인자로 받음
@@ -115,7 +113,7 @@ def get_certification(movie_details, target_country='KR'):
     return None
 
 # 영화 데이터를 Movie 테이블에 저장
-def save_movie(movie_details):
+def save_movie(cursor, movie_details):
     raw_certification = get_certification(movie_details)
     certification = convert_certification_to_int(raw_certification)
 
@@ -130,7 +128,7 @@ def save_movie(movie_details):
     keywords_str = ", ".join(keywords_list)
 
     sql = """
-    INSERT IGNORE INTO Movie (id, title, plot, poster_url, rate, certification, genres, keywords)
+    INSERT IGNORE INTO movie (id, title, plot, poster_url, rate, certification, genres, keywords)
     VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
     """
     cursor.execute(sql, (
@@ -144,7 +142,7 @@ def save_movie(movie_details):
         keywords_str
     ))
 
-def process_movies(page_range, category):
+def process_movies(cursor, conn, page_range, category):
     today = datetime.now().date()
     five_years_ago = today - timedelta(days=365*5)
 
@@ -190,7 +188,7 @@ def process_movies(page_range, category):
             details = fetch_movie_details(movie_id)
             if(details):
                 try:
-                    save_movie(details)
+                    save_movie(cursor, details)
                     print(f"Saved: {details.get('title')}")
                 except Exception as e:
                     print(f"Error saving {movie_id}: {e}")
@@ -243,16 +241,23 @@ def process_movies(page_range, category):
 #                 conn.rollback()
 
 # 아래 코드를 압축
-print("Processing Popular Movies...")
-process_movies(range(1, 51), 'popular')
+def main():
+    conn = pymysql.connect(host=db_host, port=3306, user='root', password=db_password, database='feelm', charset='utf8')
+    cursor = conn.cursor()
+    try:
+        print("Processing Popular Movies...")
+        process_movies(cursor, conn, range(1, 51), 'popular')
 
-print("Processing Top Rated Movies...")
-process_movies(range(1, 31), 'top_rated')
+        print("Processing Top Rated Movies...")
+        process_movies(cursor, conn, range(1, 31), 'top_rated')
 
-print("Processing Random Movies...")
-random_pages = random.sample(range(51, 100), 10)
-process_movies(random_pages, 'popular')
+        print("Processing Random Movies...")
+        random_pages = random.sample(range(51, 100), 10)
+        process_movies(cursor, conn, random_pages, 'popular')
+    finally:
+        conn.commit()
+        cursor.close()
+        conn.close()
 
-conn.commit()
-cursor.close()
-conn.close()
+if __name__ == "__main__":
+    main()

@@ -29,12 +29,11 @@ services:
       - TZ=Asia/Seoul  # 한국 시간 설정
       # DB 연결 설정 (Spring이 이 변수를 읽어야 함)
 #      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/feelm?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-      - SPRING_DATASOURCE_URL=jdbc:mysql://${FEELM_ENDPOINT}:3306/feelm?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      - SPRING_DATASOURCE_URL=jdbc:mysql://${RDS_ENDPOINT}:3306/feelm?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
       - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=${RDS_PASSWORD}
-      # Python 배치 서비스 주소
-#      - BATCH_SERVICE_URL=http://batch-service:5000
-      - BATCH_SERVICE_URL=http://[Lambda_함수 url]
+      - SPRING_DATASOURCE_PASSWORD=${RDS_MASTER_PASSWORD}
+      # Batch Lambda 주소
+      - BATCH_SERVICE_URL=${BATCH_SERVICE_URL}
       # (추가) JWT 비밀키가 있다면 여기에 적기
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
     networks:

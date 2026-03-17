@@ -33,15 +33,13 @@ client = OpenAI(api_key=API_KEY)
 # conn = pymysql.connect(host='localhost', port=3306, user='root', password='0630', database='feelm', charset='utf8')
 
 # Docker docker-compose에서 설정한 DB 이름, 호스트 가져옴
-db_host = os.getenv("DB_HOST", "localhost")
-db_password = os.getenv("DB_PASSWORD", "0630")
-conn = pymysql.connect(host = db_host, port = 3306, user = 'root', password = db_password, database = 'feelm', charset = 'utf8')
-cursor = conn.cursor()
+db_host = os.getenv("RDS_ENDPOINT", "localhost")
+db_password = os.getenv("RDS_MASTER_PASSWORD", "0630")
 
 
-def insert_initial_feels():
+def insert_initial_feels(cursor, conn):
     initial_feels = ['기쁨', '슬픔', '설렘', '공포', '외로움']
-    sql = "INSERT IGNORE INTO Feel (type) VALUES (%s)"
+    sql = "INSERT IGNORE INTO feel (type) VALUES (%s)"
     data_to_insert = [(f,) for f in initial_feels]
     try:
         cursor.executemany(sql, data_to_insert)
@@ -51,8 +49,8 @@ def insert_initial_feels():
         conn.rollback()
 
 
-def get_movies():
-    cursor.execute("SELECT id, title, plot, genres, keywords FROM Movie")
+def get_movies(cursor):
+    cursor.execute("SELECT id, title, plot, genres, keywords FROM movie")
     return cursor.fetchall()
 
 # openai API 호출 부분 주석 처리
@@ -147,11 +145,13 @@ def analyze_feel(title, plot, genres, keywords):
 def save_tags(movie_id, feels):
     if not feels:
         return
+    conn = pymysql.connect(host=db_host, port=3306, user='root', password=db_password, database='feelm', charset='utf8')
+    cursor = conn.cursor()
 
     # INSERT IGNORE를 사용하여 중복 태그 에러 방지
     sql = """
-    INSERT IGNORE INTO Movie_Feel_Tag (movie_id, feel_id)
-    SELECT %s, id FROM Feel WHERE type = %s
+    INSERT IGNORE INTO movie_feel_tag (movie_id, feel_id)
+    SELECT %s, id FROM feel WHERE type = %s
     """
     try:
         for feel in feels:
@@ -161,37 +161,33 @@ def save_tags(movie_id, feels):
         print(f"영화 ID {movie_id} 태그 저장 실패: {e}")
         conn.rollback()
 
-
-insert_initial_feels()
-movies = get_movies()
-
-print(f"총 {len(movies)}개의 영화 분석 시작...")
-
-for row in movies:
-
-    movie_id = row[0]
-    title = row[1]
-    plot = row[2]
-    genres = row[3] if row[3] else ""
-    keywords = row[4] if row[4] else ""
-
-    # 줄거리가 너무 짧거나 없으면 건너뛰기
-    if not plot or len(plot) < 10:
-        continue
-
-    print(f"Processing: {title}...", end=" ")
+# 영화 한 편씩 처리하는 워커 함수
+def process_single_movie(row):
+    movie_id, title, plot, genres, keywords = row[0], row[1], row[2], row[3] if row[3] else "", row[4] if row[4] else ""
+    if not plot or len(plot) < 10: return
 
     feels = analyze_feel(title, plot, genres, keywords)
+    if feels:
+        save_tags(movie_id, feels)
+        print(f"Saved: {title} -> {feels}")
+
+def main():
+    conn = pymysql.connect(host=db_host, port=3306, user='root', password=db_password, database='feelm', charset='utf8')
+    cursor = conn.cursor()
 
     try:
-        if feels:
-            save_tags(movie_id, feels)
-            print(f"  -> 결과: {feels}")
-        else:
-            print("  -> 감정 추출 실패 또는 유효하지 않은 응답")
-    except Exception as e:
-        print(f"  -> 에러 발생: {e}")
+        insert_initial_feels(cursor, conn)
+        movies = get_movies(cursor)
 
-cursor.close()
-conn.close()
-print("분석 완료")
+        print(f"총 {len(movies)}개의 영화 분석 시작...")
+
+        # 병렬 처리: 5개 스레드로 동시에 OpenAI 호출
+        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+            executor.map(process_single_movie, movies)
+    finally:
+        cursor.close()
+        conn.close()
+        print("분석 완료")
+
+if __name__ == "__main__":
+    main()

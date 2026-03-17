@@ -30,7 +30,7 @@ services:
       # DB 연결 설정 (Spring이 이 변수를 읽어야 함)
 #      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/feelm?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
       - SPRING_DATASOURCE_URL=jdbc:mysql://${RDS_ENDPOINT}:3306/feelm?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_USERNAME=root # RDS_USERNAME를 root로 설정함
       - SPRING_DATASOURCE_PASSWORD=${RDS_MASTER_PASSWORD}
       # Batch Lambda 주소
       - BATCH_SERVICE_URL=${BATCH_SERVICE_URL}
@@ -38,6 +38,10 @@ services:
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - JWT_ACCESS_EXPIRATION=${JWT_ACCESS_EXPIRATION}
       - JWT_REFRESH_EXPIRATION=${JWT_REFRESH_EXPIRATION}
+
+      - CLOUD_AWS_REGION_STATIC=${AWS_REGION}
+      - CLOUD_AWS_CREDENTIALS_ACCESS_KEY=${AWS_ACCESS_KEY}
+      - CLOUD_AWS_CREDENTIALS_SECRET_KEY=${AWS_SECRET_KEY}
     networks:
       - feelm-network
 networks:

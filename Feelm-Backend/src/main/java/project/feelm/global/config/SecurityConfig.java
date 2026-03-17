@@ -69,7 +69,6 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowCredentials(true); // 쿠키 허용
-        configuration.addAllowedOrigin(allowedOrigins); // EC2 IP
 
         // http://15.164.52.45, http://15.164.52.45:8080
         if(allowedOrigins != null){

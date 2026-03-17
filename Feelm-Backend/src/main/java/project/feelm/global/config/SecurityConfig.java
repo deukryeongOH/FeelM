@@ -1,6 +1,7 @@
 package project.feelm.global.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -23,6 +24,8 @@ import project.feelm.global.security.jwt.JwtAuthFilter;
 import project.feelm.global.security.jwt.TokenProvider;
 import project.feelm.global.security.spring.CustomUserDetailsService;
 
+import java.util.List;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -30,6 +33,9 @@ public class SecurityConfig {
 
     private final TokenProvider tokenProvider;
     private final CustomUserDetailsService customUserDetailsService;
+
+    @Value("${cors.allowed-origins}")
+    private String allowedOrigins;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
@@ -63,10 +69,14 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowCredentials(true); // 쿠키 허용
-        configuration.addAllowedOrigin("http://localhost:5173"); // 프론트 주소
-        configuration.addAllowedOrigin("http://15.164.52.45"); // EC2 IP
-        configuration.addAllowedOrigin("http://15.164.52.45:8080");
+        configuration.addAllowedOrigin(allowedOrigins); // EC2 IP
 
+        // http://15.164.52.45, http://15.164.52.45:8080
+        if(allowedOrigins != null){
+            for (String origin : allowedOrigins.split(",")) {
+                configuration.addAllowedOrigin(origin.trim());
+            }
+        }
         configuration.addAllowedHeader("*"); // 모든 header 허용
         configuration.addAllowedMethod("*"); // 모든 method 허용
 

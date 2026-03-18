@@ -28,7 +28,7 @@ public class User {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "accountId", nullable = false, unique = true)
+    @Column(name = "account_id", nullable = false, unique = true)
     private String accountId; // 증복 불가능
 
     @Column(name = "password", nullable = false)

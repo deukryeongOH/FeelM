@@ -14,8 +14,14 @@ const RecoverPasswordPage = ({ onNavigate }) => {
     setIsLoading(true);
     try {
       // 기존 방식 유지 (Query String)
-      const query = `accountId=${encodeURIComponent(data.accountId)}&email=${encodeURIComponent(data.email)}`;
-      const response = await fetch(`/api/user/recover-password?${query}`, { method: 'POST' });
+      const response = await fetch('/api/user/recover-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          accountId: data.accountId,
+          email: data.email
+        })
+      });
 
       if (response.ok) {
         const tempPwd = await response.text();

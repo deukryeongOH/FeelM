@@ -21,7 +21,7 @@ const FindPasswordForm = ({ onCancel }) => {
     setIsLoading(true);
     try {
       const query = `accountId=${encodeURIComponent(recoverData.accountId)}&email=${encodeURIComponent(recoverData.email)}`;
-      const response = await fetch(`/recover-password?${query}`, {
+      const response = await fetch(`/api/user/recover-password?${query}`, {
         method: 'POST',
       });
 
@@ -50,11 +50,15 @@ const FindPasswordForm = ({ onCancel }) => {
     
     setIsLoading(true);
     try {
-      const query = `accountId=${encodeURIComponent(recoverData.accountId)}&tempPwd=${encodeURIComponent(resetData.tempPwd)}&changePwd=${encodeURIComponent(resetData.changePwd)}`;
-      const response = await fetch(`/reset-password?${query}`, {
+      const response = await fetch('/api/user/reset-password', {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          accountId: recoverData.accountId,
+          tempPwd: resetData.tempPwd
+          changePwd: resetData.changePwd
+        })
       });
-
       if (response.ok) {
         alert('비밀번호가 성공적으로 변경되었습니다. 로그인해주세요.');
         onCancel(); // 로그인 화면으로 복귀

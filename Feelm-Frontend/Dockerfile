@@ -15,9 +15,6 @@ RUN npm run build
 # 2. 실행 단계 (Nginx 사용)
 FROM nginx:alpine
 
-# Nginx 설정 덮어쓰기
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
 # 빌드된 결과물을 Nginx 폴더로 복사
 # (Vite면 /app/dist, CRA면 /app/build 입니다. 보통 요즘은 dist입니다.)
 COPY --from=builder /app/dist /usr/share/nginx/html

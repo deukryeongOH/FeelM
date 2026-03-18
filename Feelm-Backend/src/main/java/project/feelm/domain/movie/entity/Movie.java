@@ -12,7 +12,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "Movie")
+@Table(name = "movie")
 public class Movie {
 
     @Id

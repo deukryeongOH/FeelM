@@ -49,6 +49,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(org.springframework.web.cors.CorsUtils::isPreFlightRequest).permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/user/join").permitAll()
                         .requestMatchers("/api/user/login").permitAll()
                         .requestMatchers("/api/user/findId").permitAll()

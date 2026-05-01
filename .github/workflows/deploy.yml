@@ -16,24 +16,24 @@ jobs:
         #깃허브 저장소에 있는 내 코드를 방금 빌린 우분투 컴퓨터로 내려받는다.
         # 이게 없으면 빈 컴퓨터에서 작업하는 꼴이 된다.
 
-#       EC2에서 직접 .env를 생성하므로 주석처리
-#       github 가상 머신에 .env 만드는 것 (ec2에는 영향 없음)
-#      - name: Make .env
-#        run: |
-#          # 필요한 변수들을 한 줄씩 파일에 쓴다.
-#
-#          # springboot 설정
-#          echo "SPRING_PROFILES_ACTIVE=prod" >> .env
-#
-#          # 데이터베이스 연결 (EC2 -> RDS)
-#          echo "FEELM_ENDPOINT=${{ secrets.FEELM_ENDPOINT }}" >> .env
-#          echo "RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}" >> .env
-#
-#          # 로그인 보안 키
-#          echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
-#
-#          # Lambda 주소도 필요하면 추가
-#          echo "BATCH_SERVICE_URL=${{ secrets.LAMBDA_URL }}" >> .env
+      #       EC2에서 직접 .env를 생성하므로 주석처리
+      #       github 가상 머신에 .env 만드는 것 (ec2에는 영향 없음)
+      #      - name: Make .env
+      #        run: |
+      #          # 필요한 변수들을 한 줄씩 파일에 쓴다.
+      #
+      #          # springboot 설정
+      #          echo "SPRING_PROFILES_ACTIVE=prod" >> .env
+      #
+      #          # 데이터베이스 연결 (EC2 -> RDS)
+      #          echo "FEELM_ENDPOINT=${{ secrets.FEELM_ENDPOINT }}" >> .env
+      #          echo "RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}" >> .env
+      #
+      #          # 로그인 보안 키
+      #          echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
+      #
+      #          # Lambda 주소도 필요하면 추가
+      #          echo "BATCH_SERVICE_URL=${{ secrets.LAMBDA_URL }}" >> .env
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -47,7 +47,7 @@ jobs:
           cd Feelm-Backend
           chmod +x gradlew
           ./gradlew clean bootJar
-          
+
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -104,52 +104,70 @@ jobs:
             # 이렇게 하면 해커가 코드를 훔쳐봐도 비밀번호는 알 수 없다.
             echo "SPRING_PROFILES_ACTIVE=prod" > .env
             echo "TZ=Asia/Seoul" >> .env
-                    
-            # DB 주소 (여기서 완성된 주소를 한 번에 주입)
+            
+            # 1. DB 설정 (풀네임)
             echo "SPRING_DATASOURCE_URL=jdbc:mysql://${{ secrets.RDS_ENDPOINT }}:3306/feelm?serverTimezone=Asia/Seoul&characterEncoding=UTF-8" >> .env
             echo "SPRING_DATASOURCE_USERNAME=root" >> .env
             echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.RDS_MASTER_PASSWORD }}" >> .env
-            # echo "RDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }}" >> .env
-            # echo "RDS_MASTER_PASSWORD=${{ secrets.RDS_MASTER_PASSWORD }}" >> .env
-            
-            echo "BATCH_SERVICE_URL=${{ secrets.LAMBDA_URL }}" >> .env
-            
-            echo "TMDB_API_KEY=${{ secrets.TMDB_API_KEY }}" >> .env
-            echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
-            
+  
+            # 2. JWT 및 공통 설정
             echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
             echo "JWT_ACCESS_EXPIRATION=${{ secrets.JWT_ACCESS_EXPIRATION }}" >> .env
             echo "JWT_REFRESH_EXPIRATION=${{ secrets.JWT_REFRESH_EXPIRATION }}" >> .env
-            
+            echo "BATCH_SERVICE_URL=${{ secrets.LAMBDA_URL }}" >> .env
+            echo "TMDB_API_KEY=${{ secrets.TMDB_API_KEY }}" >> .env
+            echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
             echo "CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }}" >> .env
-            
+            echo "APP_OAUTH2_REDIRECT_URI=${{ secrets.APP_OAUTH2_REDIRECT_URI }}" >> .env
+  
+            # 3. Google OAuth2 (스프링 표준 풀네임)
+            echo "SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
+            echo "SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
+            echo "SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_REDIRECT_URI=http://15.164.52.45.nip.io/login/oauth2/code/google" >> .env
+            echo "SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_SCOPE=profile,email" >> .env
+  
+            # 4. Naver OAuth2 (스프링 표준 풀네임)
+            echo "SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_NAVER_CLIENT_ID=${{ secrets.NAVER_CLIENT_ID }}" >> .env
+            echo "SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_NAVER_CLIENT_SECRET=${{ secrets.NAVER_CLIENT_SECRET }}" >> .env
+            echo "SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_NAVER_REDIRECT_URI=http://15.164.52.45.nip.io/login/oauth2/code/naver" >> .env
+            echo "SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_NAVER_AUTHORIZATION_GRANT_TYPE=authorization_code" >> .env
+            echo "SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_NAVER_CLIENT_NAME=Naver" >> .env
+            echo "SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_NAVER_AUTHORIZATION_URI=https://nid.naver.com/oauth2.0/authorize" >> .env
+            echo "SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_NAVER_TOKEN_URI=https://nid.naver.com/oauth2.0/token" >> .env
+            echo "SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_NAVER_USER_INFO_URI=https://openapi.naver.com/v1/nid/me" >> .env
+            echo "SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_NAVER_USER_NAME_ATTRIBUTE=response" >> .env
+  
+            # 5. Kakao OAuth2 (스프링 표준 풀네임)
+            echo "SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}" >> .env
+            echo "SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" >> .env
+            echo "SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KAKAO_REDIRECT_URI=http://15.164.52.45.nip.io/login/oauth2/code/kakao" >> .env
+            echo "SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KAKAO_AUTHORIZATION_GRANT_TYPE=authorization_code" >> .env
+            echo "SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KAKAO_CLIENT_AUTHENTICATION_METHOD=client_secret_post" >> .env
+            echo "SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KAKAO_AUTHORIZATION_URI=https://kauth.kakao.com/oauth/authorize" >> .env
+            echo "SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KAKAO_TOKEN_URI=https://kauth.kakao.com/oauth/token" >> .env
+            echo "SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KAKAO_USER_INFO_URI=https://kapi.kakao.com/v2/user/me" >> .env
+            echo "SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KAKAO_USER_NAME_ATTRIBUTE=id" >> .env
+  
+            # 6. AWS 설정 (풀네임)
             echo "CLOUD_AWS_REGION_STATIC=${{ secrets.AWS_REGION }}" >> .env
             echo "CLOUD_AWS_CREDENTIALS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }}" >> .env
             echo "CLOUD_AWS_CREDENTIALS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }}" >> .env
             echo "AWS_LAMBDA_FUNCTION_NAME=${{ secrets.AWS_LAMBDA_FUNCTION_NAME }}" >> .env
             
-            echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
-            echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
-            echo "NAVER_CLIENT_ID=${{ secrets.NAVER_CLIENT_ID }}" >> .env
-            echo "NAVER_CLIENT_SECRET=${{ secrets.NAVER_CLIENT_SECRET }}" >> .env
-            echo "KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}" >> .env
-            echo "KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" >> .env
-            
-            echo "APP_OAUTH2_REDIRECT_URI=${{ secrets.APP_OAUTH2_REDIRECT_URI }}" >> .env
-            
+  
             # Docker Hub 로그인
             # 서버가 Docker Hub에서 비공개 이미지를 가져오려면 로그인이 필요하다.
             echo ${{ secrets.DOCKER_PASSWORD_ACCESS_TOKEN }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-            
+  
             # 최신 이미지 받기 및 실행 (Pull)
             # 3번 단계에 DOcker Hub에 올린 최신 버전 이미지를 다운로드한다.
             docker-compose pull
-            
+  
             # 갈아끼우기 (Up)
             # docker-compose가 새 이미지를 감지하면
             # 예전 컨테이너를 끄고 새 컨테이너를 실행한다.
             docker-compose up -d --remove-orphans
-            
+  
             # 불필요한 이미지 삭제 (Prune)
             # 배포를 계속하다 보면 안 쓰는 옛날 이미지가 쌓여 용량을 차지한다.
             # 쓰레기통을 비워서 서버를 꺠끗하게 유지한다.

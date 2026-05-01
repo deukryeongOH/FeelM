@@ -6,8 +6,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -15,6 +13,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -22,9 +21,10 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import project.feelm.global.security.jwt.JwtAuthFilter;
 import project.feelm.global.security.jwt.TokenProvider;
+import project.feelm.global.security.oauth2.CustomOauth2UserService;
+import project.feelm.global.security.oauth2.OAuth2FailureHandler;
+import project.feelm.global.security.oauth2.OAuth2SuccessHandler;
 import project.feelm.global.security.spring.CustomUserDetailsService;
-
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -33,6 +33,9 @@ public class SecurityConfig {
 
     private final TokenProvider tokenProvider;
     private final CustomUserDetailsService customUserDetailsService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final CustomOauth2UserService customOauth2UserService;
+    private final OAuth2FailureHandler oAuth2FailureHandler;
 
     @Value("${CORS_ALLOWED_ORIGINS}")
     private String allowedOrigins;
@@ -57,6 +60,16 @@ public class SecurityConfig {
                         .requestMatchers("/api/user/reset-password").permitAll()
                         .requestMatchers("/api/movie/slider").permitAll()
                         .anyRequest().authenticated()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOauth2UserService) // 카카오, 네이버 용
+                                .oidcUserService(oidcUserRequest -> {
+                                    return (OidcUser) customOauth2UserService.loadUser(oidcUserRequest);
+                                }) // 구글 용
+                        )
+                        .successHandler(oAuth2SuccessHandler)
+                        .failureHandler(oAuth2FailureHandler)
                 )
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(new JwtAuthFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class);

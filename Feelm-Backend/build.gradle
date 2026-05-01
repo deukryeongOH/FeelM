@@ -45,6 +45,12 @@ dependencies {
     // AWS 인증 의존성
     implementation 'software.amazon.awssdk:auth'
 
+    // redis
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
+
+    // OAuth2
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
     compileOnly 'org.projectlombok:lombok'
 

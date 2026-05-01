@@ -24,37 +24,37 @@ services:
 #      - db # DB가 켜져야 백엔드도 켜짐 db랑 batch는 각각 RDS, LAMBDA로 갔으니 제외
     env_file: # .env 파일의 값 가져오기
       - .env
-#    environment: 위에 .env파일을 넣고 있으므로 불필요
-#      - SPRING_PROFILES_ACTIVE=prod
-#      - TZ=Asia/Seoul  # 한국 시간 설정
-#      # DB 연결 설정 (Spring이 이 변수를 읽어야 함)
-##      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/feelm?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-#      - SPRING_DATASOURCE_URL=jdbc:mysql://${RDS_ENDPOINT}:3306/feelm?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-#      - SPRING_DATASOURCE_USERNAME=root # RDS_USERNAME를 root로 설정함
-#      - SPRING_DATASOURCE_PASSWORD=${RDS_MASTER_PASSWORD}
-#      # Batch Lambda 주소
-#      - BATCH_SERVICE_URL=${BATCH_SERVICE_URL}
-#      # (추가) JWT 비밀키가 있다면 여기에 적기
-#      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
-#      - JWT_ACCESS_EXPIRATION=${JWT_ACCESS_EXPIRATION}
-#      - JWT_REFRESH_EXPIRATION=${JWT_REFRESH_EXPIRATION}
-#
-#      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-#      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-#      - NAVER_CLIENT_ID=${NAVER_CLIENT_ID}
-#      - NAVER_CLIENT_SECRET=${NAVER_CLIENT_SECRET}
-#      - KAKAO_CLIENT_ID=${KAKAO_CLIENT_ID}
-#      - KAKAO_CLIENT_SECRET=${KAKAO_CLIENT_SECRET}
-#
-#      - APP_OAUTH2_REDIRECT_URI=${APP_OAUTH2_REDIRECT_URI}
-#
-#      - AWS_LAMBDA_FUNCTION_NAME=${AWS_LAMBDA_FUNCTION_NAME}
-#
-#      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
-#
-#      - CLOUD_AWS_REGION_STATIC=${AWS_REGION}
-#      - CLOUD_AWS_CREDENTIALS_ACCESS_KEY=${AWS_ACCESS_KEY}
-#      - CLOUD_AWS_CREDENTIALS_SECRET_KEY=${AWS_SECRET_KEY}
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - TZ=Asia/Seoul  # 한국 시간 설정
+      # DB 연결 설정 (Spring이 이 변수를 읽어야 함)
+#      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/feelm?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      - SPRING_DATASOURCE_URL=jdbc:mysql://${RDS_ENDPOINT}:3306/feelm?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      - SPRING_DATASOURCE_USERNAME=root # RDS_USERNAME를 root로 설정함
+      - SPRING_DATASOURCE_PASSWORD=${RDS_MASTER_PASSWORD}
+      # Batch Lambda 주소
+      - BATCH_SERVICE_URL=${BATCH_SERVICE_URL}
+      # (추가) JWT 비밀키가 있다면 여기에 적기
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_ACCESS_EXPIRATION=${JWT_ACCESS_EXPIRATION}
+      - JWT_REFRESH_EXPIRATION=${JWT_REFRESH_EXPIRATION}
+
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - NAVER_CLIENT_ID=${NAVER_CLIENT_ID}
+      - NAVER_CLIENT_SECRET=${NAVER_CLIENT_SECRET}
+      - KAKAO_CLIENT_ID=${KAKAO_CLIENT_ID}
+      - KAKAO_CLIENT_SECRET=${KAKAO_CLIENT_SECRET}
+
+      - APP_OAUTH2_REDIRECT_URI=${APP_OAUTH2_REDIRECT_URI}
+
+      - AWS_LAMBDA_FUNCTION_NAME=${AWS_LAMBDA_FUNCTION_NAME}
+
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
+
+      - CLOUD_AWS_REGION_STATIC=${AWS_REGION}
+      - CLOUD_AWS_CREDENTIALS_ACCESS_KEY=${AWS_ACCESS_KEY}
+      - CLOUD_AWS_CREDENTIALS_SECRET_KEY=${AWS_SECRET_KEY}
     networks:
       - feelm-network
 networks:

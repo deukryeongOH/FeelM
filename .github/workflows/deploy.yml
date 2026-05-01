@@ -105,9 +105,8 @@ jobs:
             echo "SPRING_PROFILES_ACTIVE=prod" > .env
             echo "TZ=Asia/Seoul" >> .env
             
-            echo "SPRING_DATASOURCE_URL=jdbc:mysql://${{ secrets.RDS_ENDPOINT }}:3306/feelm?serverTimezone=Asia/Seoul&characterEncoding=UTF-8" >> .env
-            echo "SPRING_DATASOURCE_USERNAME=root" >> .env
-            echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.RDS_MASTER_PASSWORD }}" >> .env
+            echo "RDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }}" >> .env
+            echo "RDS_MASTER_PASSWORD=${{ secrets.RDS_MASTER_PASSWORD }}" >> .env
             
             echo "BATCH_SERVICE_URL=${{ secrets.LAMBDA_URL }}" >> .env
             

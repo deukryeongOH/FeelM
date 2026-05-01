@@ -109,7 +109,6 @@ jobs:
             
             echo "BATCH_SERVICE_URL=${{ secrets.LAMBDA_URL }}" >> .env
             
-            echo "AWS_LAMBDA_FUNCTION_NAME=${{ secrets.AWS_LAMBDA_FUNCTION_NAME }}" >> .env
             echo "TMDB_API_KEY=${{ secrets.TMDB_API_KEY }}" >> .env
             echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
             
@@ -123,6 +122,13 @@ jobs:
             echo "AWS_LAMBDA_FUNCTION_NAME=${{ secrets.AWS_LAMBDA_FUNCTION_NAME }}" >> .env
             echo "AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }}" >> .env
             echo "AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }}" >> .env
+            
+            echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
+            echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
+            echo "NAVER_CLIENT_ID=${{ secrets.NAVER_CLIENT_ID }}" >> .env
+            echo "NAVER_CLIENT_SECRET=${{ secrets.NAVER_CLIENT_SECRET }}" >> .env
+            echo "KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}" >> .env
+            echo "KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" >> .env
             
             # Docker Hub 로그인
             # 서버가 Docker Hub에서 비공개 이미지를 가져오려면 로그인이 필요하다.

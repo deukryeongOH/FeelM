@@ -130,6 +130,8 @@ jobs:
             echo "KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}" >> .env
             echo "KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" >> .env
             
+            echo "APP_OAUTH2_REDIRECT_URI=${{ secrets.APP_OAUTH2_REDIRECT_URI }}" >> .env
+            
             # Docker Hub 로그인
             # 서버가 Docker Hub에서 비공개 이미지를 가져오려면 로그인이 필요하다.
             echo ${{ secrets.DOCKER_PASSWORD_ACCESS_TOKEN }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin

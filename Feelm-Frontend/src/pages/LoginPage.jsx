@@ -258,7 +258,7 @@ import { ArrowLeft, Mail, Lock, User } from 'lucide-react';
 
 const SocialButton = ({ provider, bgColor, textColor, text, icon }) => (
   <a
-    href={`http://localhost:8080/oauth2/authorization/${provider}`}
+    href={`http://15.164.52.45.nip.io/oauth2/authorization/${provider}`}
     className={`w-full py-3 px-4 flex items-center justify-center gap-3 rounded-xl font-semibold transition-all hover:opacity-90 active:scale-[0.98] mb-3 ${bgColor} ${textColor} shadow-md`}
   >
     {icon}

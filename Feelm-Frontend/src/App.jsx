@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Film, User, LogIn, UserPlus, LogOut } from 'lucide-react';
+import OAuth2RedirectHandler from './pages/OAuth2RedirectHandler';
 
 // 페이지 컴포넌트 임포트
 import MainPage from './pages/MainPage';
@@ -14,7 +15,9 @@ export default function App() {
   useEffect(() => {
     const accessToken = localStorage.getItem('accessToken');
     const storedUser = localStorage.getItem('user'); // 사용자 이름도 저장했다고 가정
-
+    if (window.location.pathname === '/oauth-callback') {
+      setCurrentView('oauth-callback');
+    }
     if (accessToken && storedUser) {
       // 토큰과 이름이 있으면 로그인 상태로 설정
       setUser(JSON.parse(storedUser));
@@ -45,6 +48,8 @@ export default function App() {
       case 'home': return <MainPage onNavigate={setCurrentView} user={user} />;
       case 'login': return <LoginPage onNavigate={setCurrentView} onLogin={handleLoginSuccess} />;
       case 'signup': return <SignupPage onNavigate={setCurrentView} />;
+      case 'oauth-callback':
+            return <OAuth2RedirectHandler onLogin={handleLoginSuccess} onNavigate={setCurrentView} />;
       case 'profile': return <ProfilePage user={user} onNavigate={setCurrentView} />;
       case 'recommend': return <RecommendPage user={user} onNavigate={setCurrentView} />;
       default: return <MainPage onNavigate={setCurrentView} user={user} />;

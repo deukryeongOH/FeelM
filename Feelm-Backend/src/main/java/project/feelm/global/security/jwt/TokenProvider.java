@@ -12,7 +12,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
+import project.feelm.domain.user.entity.User;
+import project.feelm.domain.user.repository.UserRepository;
+import project.feelm.global.security.oauth2.CustomOauth2UserService;
 import project.feelm.global.security.spring.CustomUserDetails;
 import project.feelm.global.security.spring.CustomUserDetailsService;
 
@@ -37,6 +41,7 @@ public class TokenProvider {
 
     private SecretKey key;
     private final CustomUserDetailsService customUserDetailsService;
+    private final UserRepository userRepository;
 
     @PostConstruct
     public void init() {
@@ -47,8 +52,22 @@ public class TokenProvider {
     public String createAccessToken(Authentication authentication){
         Date now = new Date();
 
-        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
-        Long id = customUserDetails.getUser().getId();
+        Object principal = authentication.getPrincipal();
+        System.out.println("현재 Principal 타입: " + principal.getClass().getName());
+        Long id = null;
+
+        if (principal instanceof CustomUserDetails) {
+            // 일반 로그인 혹은 우리가 만든 OAuth2 서비스에서 반환한 경우
+            id = ((CustomUserDetails) principal).getUser().getId();
+        } else if (principal instanceof OAuth2User) {
+            // CustomUserDetails로 변환되지 않은 일반 OAuth2User가 들어온 경우
+
+        }
+
+        // ID가 없는 경우에 대한 예외 처리
+        if (id == null) {
+            throw new RuntimeException("인증 정보에서 사용자 ID를 찾을 수 없습니다.");
+        }
 
         List<String> roles = authentication.getAuthorities()
                 .stream()
@@ -67,9 +86,26 @@ public class TokenProvider {
     public String createRefreshToken(Authentication authentication){
         Date now = new Date();
 
-        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
-        Long id = customUserDetails.getUser().getId();
+        Object principal = authentication.getPrincipal();
+        Long id = null;
 
+        if (principal instanceof CustomUserDetails) {
+            // 일반 로그인 혹은 우리가 만든 OAuth2 서비스에서 반환한 경우
+            id = ((CustomUserDetails) principal).getUser().getId();
+        } else if (principal instanceof OAuth2User) {
+            // CustomUserDetails로 변환되지 않은 일반 OAuth2User가 들어온 경우
+            OAuth2User oAuth2User = (OAuth2User) principal;
+            String providerId = (String) oAuth2User.getAttributes().get("sub");
+
+            id = userRepository.findByProviderAndProviderId("google", providerId)
+                    .map(User::getId)
+                    .orElseThrow(() -> new RuntimeException("구글 로그인 유저를 DB에서 찾을 수 없습니다."));
+        }
+
+        // ID가 없는 경우에 대한 예외 처리
+        if (id == null) {
+            throw new RuntimeException("인증 정보에서 사용자 ID를 찾을 수 없습니다.");
+        }
         List<String> roles = authentication.getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
@@ -105,6 +141,7 @@ public class TokenProvider {
     public Authentication getAuthentication(String token) {
         Claims claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
 
+        // 토큰 검증 시 user의 ID를 꺼내서 확인한다.
         Long userId = Long.parseLong(claims.getSubject());
         UserDetails userDetails = customUserDetailsService.loadUserById(userId);
 

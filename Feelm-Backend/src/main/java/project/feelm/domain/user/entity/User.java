@@ -25,7 +25,7 @@ public class User {
     @Column(name = "age", nullable = false)
     private int age; // 19세 영화 제한을 위해
 
-    @Column(name = "email", nullable = false, unique = true)
+    @Column(name = "email") // nullable 제거 이유 (소셜 로그인 이메일 못가져와서)
     private String email;
 
     @Column(name = "account_id", nullable = false, unique = true)
@@ -33,6 +33,9 @@ public class User {
 
     @Column(name = "password", nullable = false)
     private String password;
+
+    private String provider; // google, kakao, naver
+    private String providerId; // ex) google 아이디, naver 아이디, kakao 아이디
 
     private LocalDateTime create_date;
     private LocalDateTime update_date;
@@ -46,14 +49,22 @@ public class User {
 //    private List<Feel> feel;
 
     @Builder
-    public User(String name, int age, String email, String accountId, String password) {
+    public User(String name, int age, String email, String accountId, String password, String provider, String providerId) {
         this.name = name;
         this.age = age;
         this.email = email;
         this.accountId = accountId;
         this.password = password;
+        this.provider = provider;
+        this.providerId = providerId;
         this.create_date = LocalDateTime.now();
         this.update_date = LocalDateTime.now();
+    }
+
+    public User update(String name) {
+        this.name = name;
+        this.update_date = LocalDateTime.now();
+        return this;
     }
 }
 
